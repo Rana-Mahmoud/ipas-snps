@@ -2,6 +2,10 @@
 #  - by first looking for closest genes in the vicinity of a SNP, 
 #  - or via eQTL mapping (expression quantitative trait loci)
 # ``````````````````````````````````````````````````
+setwd("~/Desktop/Rs-Work/ipas-snps")
+library(IRanges)
+library(GenomeInfoDb)
+library(GenomicRanges)
 # First : lets simulate SNPs data
 #---------------------------------
 snps.sourcePath = "generate-snps-data.R"
@@ -86,7 +90,13 @@ range2GRanges <- function(df) {
 
 # ---------------------------------------
 
+# convert SNPs to GRanges
+snps.ranges <- string2range(snps, delim=":", region=FALSE)
+head(snps.ranges)
 
+snps.granges <- range2GRanges(snps.ranges)
+names(snps.granges) <- snps
+head(snps.granges)
 
 
 
