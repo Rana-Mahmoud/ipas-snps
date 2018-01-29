@@ -18,11 +18,11 @@ n.snps <- 120
 # get pathogenecity matrix
 snps.pathogenicity <- get.Snps.matrix(n.snps)
 #colnames(snps.pathogenicity)
-  
+
 # get snps names
 snps.info <- as.data.frame( get.Snps.list(n.snps))
 #head(snps.names)
-  
+
 # update matric snps names
 colnames(snps.pathogenicity) = snps.info$snpname
 # ````````````````````````````````````````````````````
@@ -31,46 +31,9 @@ colnames(snps.pathogenicity) = snps.info$snpname
 # map snps to genes 
 # http://jef.works/blog/2016/12/06/mapping-snps-and-peaks-to-genes-in-R/
 
-# Try documentation example I want to map a set of SNPs to genes.
-
-# Sample snps
-snps <- c("1:11873", "1:69100", "1:752761")
-
-# Sample genes from GTF
-gtfFile <- '~/Desktop/Rs-Work/Homo_sapiens.GRCh37.75.gtf'
-gtf <- read.table(gtfFile, header=F, stringsAsFactors=F, sep='\t', nrows=1000) # limit number of rows for testing
-gtf.gene <- gtf[gtf[,3]=="gene", c(1,4,5)]
-gene.names <- unlist(lapply(gtf[gtf[,3]=="gene", 9], function(x) {
-  y <- strsplit(x, ';')[[1]][2]
-  gsub(' gene_name ', '', y)
-}))
-rownames(gtf.gene) <- gene.names
-# contains (gene.name , chromosome , start.pos.range, end.pos.range)
-head(gtf.gene)
-
 # ---------------------------------------
 
-# Define a few helper functions
-
-#' Convert from string to range
-#' 
-#' @param pos A vector of strings ex. chr1 2938302 2938329
-#' @param delim Delimiter for string splitting
-#' @param region Boolean of whether region or just one position
-#'
-#' @returns Dataframe of ranges
-#' 
-string2range <- function(pos, delim=' ', region=TRUE) {
-  posp <- as.data.frame(do.call(rbind, strsplit(pos, delim)))
-  posp[,1] <- posp[,1]
-  posp[,2] <- as.numeric(as.character(posp[,2]))
-  if(region) {
-    posp[,3] <- as.numeric(as.character(posp[,3]))
-  } else {
-    posp[,3] <- posp[,2]
-  }
-  return(posp)
-}
+# Define a few helper function
 
 #' Convert from ranges to GRanges
 #' 
@@ -89,49 +52,76 @@ range2GRanges <- function(df) {
 }
 
 # ---------------------------------------
-
-# convert SNPs to GRanges
-snps.ranges <- string2range(snps, delim=":", region=FALSE)
-head(snps.ranges)
-
-snps.granges <- range2GRanges(snps.ranges)
-names(snps.granges) <- snps
-head(snps.granges)
-
-# convert genes to GRanges
-gtf.granges <- range2GRanges(gtf.gene)
-names(gtf.granges) <- gene.names
-head(gtf.granges)
-
-# ---------------------------------------
-
-# Now that we have our two GRanges objects,
-# we can easily overlap them using GenomicRanges::findOverlaps.
-
-r1 <- snps.granges
-r2 <- gtf.granges
-overlap <- GenomicRanges::findOverlaps(r1, r2)
-
-# explor the output
-slotNames(overlap)
-#[1] "from"            "to"              "nLnode"          "nRnode"         
-#[5] "elementMetadata" "metadata"    
-
-# where ,
-# from == "queryHits"
-# to == "subjectHits"
-
-# make vector of SNPs to genes
-#hits <- names(r2)[slot(overlap, "subjectHits")]
-hits <- names(r2)[slot(overlap, "to")]
-
-#names(hits) <- names(r1)[slot(overlap, "queryHits")]
-names(hits) <- names(r1)[slot(overlap, "from")]
-
-hits <- as.matrix(hits)
-View(hits)
-
-
+# function that maps snps to nearest genes
+map.snps.to.genes <- function(snps.info)
+{
+  # Sample genes from GTF
+  gtfFile <- '~/Desktop/Rs-Work/Homo_sapiens.GRCh37.75.gtf'
+  gtf <- read.table(gtfFile, header=F, stringsAsFactors=F, sep='\t', nrows=1000) # limit number of rows for testing
+  gtf.gene <- gtf[gtf[,3]=="gene", c(1,4,5)]
+  gene.names <- unlist(lapply(gtf[gtf[,3]=="gene", 9], function(x) {
+    y <- strsplit(x, ';')[[1]][2]
+    gsub(' gene_name ', '', y)
+  }))
+  rownames(gtf.gene) <- gene.names
+  # contains (gene.name , chromosome , start.pos.range, end.pos.range)
+  head(gtf.gene)
+  
+  # clean snps data 
+  snps.pos <- as.numeric( as.matrix(snps.info$position))
+  snps.chr <- as.numeric( as.matrix(snps.info$chr))
+  
+  # create range with epositions of current snps
+  snps.pos.range <- data.frame("chr"= snps.chr,"startRange"=snps.pos,"endRange"=snps.pos)
+  head(snps.pos.range)
+  
+  # convert SNPs to GRanges
+  snps.granges <- range2GRanges(snps.pos.range)
+  names(snps.granges) <- snps.info$snpname
+  head(snps.granges)
+  
+  # convert genes to GRanges
+  gtf.granges <- range2GRanges(gtf.gene)
+  names(gtf.granges) <- gene.names
+  head(gtf.granges)
+  
+  # ---------------------------------------
+  
+  # Now that we have our two GRanges objects,
+  # we can easily overlap them using GenomicRanges::findOverlaps.
+  
+  r1 <- snps.granges
+  r2 <- gtf.granges
+  overlap <- GenomicRanges::findOverlaps(r1, r2)
+  
+  # explor the output
+  overlap
+  #Hits object with 2 hits and 0 metadata columns:
+  #  queryHits subjectHits
+  # <integer>   <integer>
+  #  [1]         1          51
+  # [2]         1          52
+  #-------
+  #  queryLength: 120 / subjectLength: 69
+  
+  slotNames(overlap)
+  #[1] "from"            "to"              "nLnode"          "nRnode"         
+  #[5] "elementMetadata" "metadata"    
+  
+  # where ,
+  # from == "queryHits"
+  # to == "subjectHits"
+  
+  # make vector of SNPs to genes
+  target.genes <- names(r2)[slot(overlap, "to")]
+  target.snps <-names(r1)[slot(overlap, "from")]
+  
+  # check results
+  mapped.hits <- as.matrix(cbind(target.snps,target.genes),colnames("SNPs","genes"))
+  View(mapped.hits)
+  
+  return(mapped.hits)
+}
 
 
 
