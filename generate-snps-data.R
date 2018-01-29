@@ -59,13 +59,34 @@ get.Snps.list <- function(n.snp)
              , no_cores=NA)
     
   }
-  snps.file <- read.table(target.path)
-  head(snps.file)
-  
-  # subset n.snps names
-  snps.names <- snps.file[1:n.snps,2]
-
-  return(snps.names)
+  # list of current snps chromosomes
+  chromosomes.list <- c("1","8","17","20")
+  # quarter the n.snps
+  q.n.snps <- n.snps/4
+  # create empty matrix of (snps.name, chromosome.number , position)
+  snps.mat <- matrix(0,nrow = 1,ncol = 3)
+  colnames(snps.mat) <-  c("snpname","chr","position")
+  head(snps.mat)
+  for (i in chromosomes.list)
+  {
+    curr.chr.path <- paste0(curr.dir,"/snps-results/triad",i,".bim")
+    snps.file <- read.table(curr.chr.path)
+    head(snps.file)
+    # subset quarter the n.snps
+    q.snps.info <- snps.file[1:q.n.snps,c(2,1,4)]
+    colnames(q.snps.info) <- c("snpname","chr","position")
+    head(q.snps.info)
+    # append to main snpa list
+    snps.mat <- rbind(snps.mat,q.snps.info)
+    head(snps.mat)
+  }
+  #dim(snps.mat)
+  #head(snps.mat)
+  snps.info <- as.matrix(snps.mat[1:n.snps+1,])
+  #head(snps.info)
+  #tail(snps.info)
+  #dim(snps.info)
+  return(snps.info)
 }
 
 ##### Generate SNPS list and SNPs pathogenicity scores matrix
