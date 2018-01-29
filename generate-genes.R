@@ -46,9 +46,45 @@ head(gtf.gene)
 
 # ---------------------------------------
 
-# 
+# Define a few helper functions
 
+#' Convert from string to range
+#' 
+#' @param pos A vector of strings ex. chr1 2938302 2938329
+#' @param delim Delimiter for string splitting
+#' @param region Boolean of whether region or just one position
+#'
+#' @returns Dataframe of ranges
+#' 
+string2range <- function(pos, delim=' ', region=TRUE) {
+  posp <- as.data.frame(do.call(rbind, strsplit(pos, delim)))
+  posp[,1] <- posp[,1]
+  posp[,2] <- as.numeric(as.character(posp[,2]))
+  if(region) {
+    posp[,3] <- as.numeric(as.character(posp[,3]))
+  } else {
+    posp[,3] <- posp[,2]
+  }
+  return(posp)
+}
 
+#' Convert from ranges to GRanges
+#' 
+#' @param df Dataframe with columns as sequence name, start, and end
+#' 
+#' @returns GRanges version 
+#' 
+range2GRanges <- function(df) {
+  require(GenomicRanges)
+  require(IRanges)
+  gr <- GenomicRanges::GRanges(
+    seqnames = df[,1],
+    ranges=IRanges(start = df[,2], end = df[,3])
+  )
+  return(gr)
+}
+
+# ---------------------------------------
 
 
 
