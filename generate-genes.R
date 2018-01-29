@@ -27,9 +27,26 @@ colnames(snps.pathogenicity) = snps.info$snpname
 # map snps to genes 
 # http://jef.works/blog/2016/12/06/mapping-snps-and-peaks-to-genes-in-R/
 
-# Try documentation example 
+# Try documentation example I want to map a set of SNPs to genes.
 
+# Sample snps
+snps <- c("1:11873", "1:69100", "1:752761")
 
+# Sample genes from GTF
+gtfFile <- '~/Desktop/Rs-Work/Homo_sapiens.GRCh37.75.gtf'
+gtf <- read.table(gtfFile, header=F, stringsAsFactors=F, sep='\t', nrows=1000) # limit number of rows for testing
+gtf.gene <- gtf[gtf[,3]=="gene", c(1,4,5)]
+gene.names <- unlist(lapply(gtf[gtf[,3]=="gene", 9], function(x) {
+  y <- strsplit(x, ';')[[1]][2]
+  gsub(' gene_name ', '', y)
+}))
+rownames(gtf.gene) <- gene.names
+# contains (gene.name , chromosome , start.pos.range, end.pos.range)
+head(gtf.gene)
+
+# ---------------------------------------
+
+# 
 
 
 
