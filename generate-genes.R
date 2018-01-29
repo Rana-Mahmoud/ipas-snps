@@ -98,7 +98,10 @@ snps.granges <- range2GRanges(snps.ranges)
 names(snps.granges) <- snps
 head(snps.granges)
 
-
+# convert genes to GRanges
+gtf.granges <- range2GRanges(gtf.gene)
+names(gtf.granges) <- gene.names
+head(gtf.granges)
 
 
 
