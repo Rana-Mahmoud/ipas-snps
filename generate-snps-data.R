@@ -26,6 +26,7 @@ get.Snps.matrix <- function(n.snps)
 # Step 2 : generate SNPs 
 get.Snps.list <- function(n.snp)
 {
+  curr.dir <- getwd()
   # access results and take subset of snps names = n.snp
   target.path <- paste0(curr.dir,"/snps-results/triad1.bim")
   # check if file exist
@@ -36,7 +37,7 @@ get.Snps.list <- function(n.snp)
     k.file <- paste(system.file(package = "TriadSim"),'/extdata/pop1_4chr_kid',sep='')
     input.plink.file <- c(m.file, f.file, k.file)
     
-    curr.dir <- getwd()
+    
     #, out.put.file=paste(curr.dir,"/snps-results/",'triad',sep='')
     
     TriadSim(input.plink.file
