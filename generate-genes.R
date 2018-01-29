@@ -103,10 +103,33 @@ gtf.granges <- range2GRanges(gtf.gene)
 names(gtf.granges) <- gene.names
 head(gtf.granges)
 
+# ---------------------------------------
 
+# Now that we have our two GRanges objects,
+# we can easily overlap them using GenomicRanges::findOverlaps.
 
+r1 <- snps.granges
+r2 <- gtf.granges
+overlap <- GenomicRanges::findOverlaps(r1, r2)
 
+# explor the output
+slotNames(overlap)
+#[1] "from"            "to"              "nLnode"          "nRnode"         
+#[5] "elementMetadata" "metadata"    
 
+# where ,
+# from == "queryHits"
+# to == "subjectHits"
+
+# make vector of SNPs to genes
+#hits <- names(r2)[slot(overlap, "subjectHits")]
+hits <- names(r2)[slot(overlap, "to")]
+
+#names(hits) <- names(r1)[slot(overlap, "queryHits")]
+names(hits) <- names(r1)[slot(overlap, "from")]
+
+hits <- as.matrix(hits)
+View(hits)
 
 
 
