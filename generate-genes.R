@@ -6,27 +6,9 @@ setwd("~/Desktop/Rs-Work/ipas-snps")
 library(IRanges)
 library(GenomeInfoDb)
 library(GenomicRanges)
-# First : lets simulate SNPs data
-#---------------------------------
-snps.sourcePath = "generate-snps-data.R"
-source(snps.sourcePath)
 
-# number of target snps 
-# "NB : Must be divisable by 4"
-n.snps <- 120
-
-# get pathogenecity matrix
-snps.pathogenicity <- get.Snps.matrix(n.snps)
-#colnames(snps.pathogenicity)
-
-# get snps names
-snps.info <- as.data.frame( get.Snps.list(n.snps))
-#head(snps.names)
-
-# update matric snps names
-colnames(snps.pathogenicity) = snps.info$snpname
 # ````````````````````````````````````````````````````
-# Secound : generate genes from current snps
+# generate genes from current snps
 #--------------------------------------------
 # map snps to genes 
 # http://jef.works/blog/2016/12/06/mapping-snps-and-peaks-to-genes-in-R/
@@ -123,13 +105,8 @@ map.snps.to.genes <- function(snps.info)
   return(mapped.hits)
 }
 
-hits <- map.snps.to.genes(snps.info)
+#hits <- map.snps.to.genes(snps.info)
 # Output
 #     target.snps target.genes   
 #[1,] "rs3094315" "RP11-206L10.9"
 #[2,] "rs3094315" "RP11-206L10.8"
-
-
-# To map genes to pathways using Reactom , Check this package
-# https://bioconductor.org/packages/devel/bioc/vignettes/ReactomePA/inst/doc/ReactomePA.html
-
