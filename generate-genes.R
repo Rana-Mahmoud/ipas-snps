@@ -123,8 +123,13 @@ map.snps.to.genes <- function(snps.info)
   return(mapped.hits)
 }
 
+hits <- map.snps.to.genes(snps.info)
+# Output
+#     target.snps target.genes   
+#[1,] "rs3094315" "RP11-206L10.9"
+#[2,] "rs3094315" "RP11-206L10.8"
 
 
-
-
+# To map genes to pathways using Reactom , Check this package
+# https://bioconductor.org/packages/devel/bioc/vignettes/ReactomePA/inst/doc/ReactomePA.html
 
